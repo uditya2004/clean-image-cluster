@@ -36,3 +36,67 @@
     @apply bg-background text-foreground antialiased;
   }
 }
+
+/* Custom Toast Styles */
+[role="status"][data-state="open"],
+[role="alert"][data-state="open"] {
+  @apply animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 sm:slide-in-from-bottom-2;
+  @apply bg-white border border-gray-200 shadow-lg;
+  @apply dark:bg-gray-900 dark:border-gray-800;
+}
+
+[role="status"][data-state="closed"],
+[role="alert"][data-state="closed"] {
+  @apply animate-out fade-out-0 zoom-out-95 slide-out-to-right-full;
+}
+
+[role="status"],
+[role="alert"] {
+  @apply pointer-events-auto relative w-full rounded-lg p-6;
+  @apply backdrop-blur-sm bg-white/90 border border-gray-200;
+  @apply dark:bg-gray-900/90 dark:border-gray-800;
+  @apply shadow-[0_2px_4px_rgba(0,0,0,0.02)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.05)];
+  @apply transition-all duration-200;
+}
+
+[role="status"] h1,
+[role="alert"] h1,
+[role="status"] [data-toast-title],
+[role="alert"] [data-toast-title] {
+  @apply text-sm font-medium text-gray-900;
+  @apply dark:text-gray-100;
+}
+
+[role="status"] [data-toast-description],
+[role="alert"] [data-toast-description] {
+  @apply mt-1 text-sm text-gray-500;
+  @apply dark:text-gray-400;
+}
+
+[role="status"][data-variant="destructive"],
+[role="alert"][data-variant="destructive"] {
+  @apply border-gray-900 bg-gray-900 text-gray-50;
+  @apply dark:border-gray-100 dark:bg-gray-100 dark:text-gray-900;
+}
+
+[role="status"][data-variant="destructive"] [data-toast-description],
+[role="alert"][data-variant="destructive"] [data-toast-description] {
+  @apply text-gray-200;
+  @apply dark:text-gray-700;
+}
+
+[role="status"] [data-toast-close],
+[role="alert"] [data-toast-close] {
+  @apply absolute right-2 top-2 rounded-md p-1;
+  @apply text-gray-400 opacity-0 transition-opacity;
+  @apply hover:text-gray-900;
+  @apply dark:text-gray-500 dark:hover:text-gray-100;
+  @apply focus:opacity-100 focus:outline-none focus:ring-1;
+  @apply group-hover:opacity-100;
+}
+
+[role="status"][data-variant="destructive"] [data-toast-close],
+[role="alert"][data-variant="destructive"] [data-toast-close] {
+  @apply text-gray-300 hover:text-gray-50;
+  @apply dark:text-gray-700 dark:hover:text-gray-900;
+}
