@@ -15,6 +15,7 @@ interface ProcessingFeature {
 }
 
 const features = [
+  { id: "face", label: "Cluster by Face" },
   { id: "duplicates", label: "Remove Duplicates" },
   { id: "blur", label: "Remove Blur Images" },
   { id: "angles", label: "Remove Bad Angles" },
