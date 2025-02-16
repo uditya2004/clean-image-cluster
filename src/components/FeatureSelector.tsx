@@ -1,10 +1,12 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
 import { Card } from "./ui/card";
-import { Image, Ban, Eye, UserSearch } from "lucide-react";
+import { Image, Ban, Eye, UserSearch, Camera, Upload } from "lucide-react";
 import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface Feature {
   id: string;
@@ -47,10 +49,65 @@ export const FeatureSelector = ({
   onFeatureToggle,
 }: FeatureSelectorProps) => {
   const [facePhoto, setFacePhoto] = useState<File | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { toast } = useToast();
 
   const handleFacePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFacePhoto(e.target.files[0]);
+    }
+  };
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        setShowCamera(true);
+      }
+    } catch (err) {
+      toast({
+        title: "Camera Error",
+        description: "Unable to access camera. Please check permissions.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+
+      if (context) {
+        // Set canvas dimensions to match video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Draw video frame to canvas
+        context.drawImage(video, 0, 0);
+
+        // Convert canvas to file
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const file = new File([blob], "captured-face.jpg", { type: "image/jpeg" });
+            setFacePhoto(file);
+            
+            // Stop camera stream
+            const stream = video.srcObject as MediaStream;
+            stream.getTracks().forEach(track => track.stop());
+            setShowCamera(false);
+
+            toast({
+              title: "Photo captured",
+              description: "Reference photo has been captured successfully.",
+            });
+          }
+        }, 'image/jpeg');
+      }
     }
   };
 
@@ -74,24 +131,61 @@ export const FeatureSelector = ({
               />
             </div>
             {feature.requiresPhoto && selectedFeatures.includes(feature.id) && (
-              <div className="ml-8 mt-2 flex items-center gap-2 animate-in slide-in-from-top-2 duration-200">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  className="w-full text-sm"
-                  onChange={handleFacePhotoChange}
-                  onClick={(e) => {
-                    // Reset the input value to allow selecting the same file again
-                    (e.target as HTMLInputElement).value = '';
-                  }}
-                />
-                {facePhoto && (
-                  <img
-                    src={URL.createObjectURL(facePhoto)}
-                    alt="Reference face"
-                    className="h-8 w-8 rounded-full object-cover shrink-0"
-                  />
+              <div className="ml-8 mt-2 space-y-3 animate-in slide-in-from-top-2 duration-200">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      className="w-full text-sm"
+                      onChange={handleFacePhotoChange}
+                      onClick={(e) => {
+                        (e.target as HTMLInputElement).value = '';
+                      }}
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                    onClick={startCamera}
+                  >
+                    <Camera className="h-4 w-4" />
+                    Capture
+                  </Button>
+                </div>
+
+                {showCamera && (
+                  <div className="relative rounded-lg border overflow-hidden">
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      className="w-full"
+                    />
+                    <Button
+                      className="absolute bottom-2 left-1/2 transform -translate-x-1/2"
+                      onClick={capturePhoto}
+                    >
+                      Take Photo
+                    </Button>
+                  </div>
                 )}
+
+                {facePhoto && !showCamera && (
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={URL.createObjectURL(facePhoto)}
+                      alt="Reference face"
+                      className="h-12 w-12 rounded-full object-cover shrink-0"
+                    />
+                    <span className="text-sm text-gray-500">
+                      Reference photo selected
+                    </span>
+                  </div>
+                )}
+
+                <canvas ref={canvasRef} className="hidden" />
               </div>
             )}
           </div>
