@@ -51,7 +51,6 @@ export const FeatureSelector = ({
   const handleFacePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFacePhoto(e.target.files[0]);
-      onFeatureToggle("face");
     }
   };
 
@@ -60,23 +59,26 @@ export const FeatureSelector = ({
       <h3 className="mb-4 text-lg font-medium">Select Features</h3>
       <div className="space-y-4">
         {features.map((feature) => (
-          <div
-            key={feature.id}
-            className="flex items-center justify-between space-x-4"
-          >
-            <div className="flex items-center space-x-3">
-              {feature.icon}
-              <Label htmlFor={feature.id} className="text-sm font-medium">
-                {feature.label}
-              </Label>
+          <div key={feature.id} className="space-y-2">
+            <div className="flex items-center justify-between space-x-4">
+              <div className="flex items-center space-x-3">
+                {feature.icon}
+                <Label htmlFor={feature.id} className="text-sm font-medium">
+                  {feature.label}
+                </Label>
+              </div>
+              <Switch
+                id={feature.id}
+                checked={selectedFeatures.includes(feature.id)}
+                onCheckedChange={() => onFeatureToggle(feature.id)}
+              />
             </div>
-            {feature.requiresPhoto ? (
-              <div className="flex items-center gap-2">
+            {feature.requiresPhoto && selectedFeatures.includes(feature.id) && (
+              <div className="ml-8 mt-2 flex items-center gap-2 animate-in slide-in-from-top-2 duration-200">
                 <Input
-                  id={feature.id}
                   type="file"
                   accept="image/*"
-                  className="w-40 text-sm"
+                  className="w-full text-sm"
                   onChange={handleFacePhotoChange}
                   onClick={(e) => {
                     // Reset the input value to allow selecting the same file again
@@ -87,16 +89,10 @@ export const FeatureSelector = ({
                   <img
                     src={URL.createObjectURL(facePhoto)}
                     alt="Reference face"
-                    className="h-8 w-8 rounded-full object-cover"
+                    className="h-8 w-8 rounded-full object-cover shrink-0"
                   />
                 )}
               </div>
-            ) : (
-              <Switch
-                id={feature.id}
-                checked={selectedFeatures.includes(feature.id)}
-                onCheckedChange={() => onFeatureToggle(feature.id)}
-              />
             )}
           </div>
         ))}
