@@ -3,7 +3,7 @@
 
 A powerful web application for intelligent image organization and processing. This tool helps users organize and clean their image collections using advanced features like facial recognition clustering, duplicate detection, and quality assessment.
 
-![App Preview](public/ProjectScreenShot.png)
+![App Preview](public/ProjectScreenShot1.png)
 
 ## Features
 
