@@ -1,49 +1,102 @@
-# Image Clustering
 
-## How can I edit this code?
+# Image Clustering App
 
-**Use your preferred IDE**
+A powerful web application for intelligent image organization and processing. This tool helps users organize and clean their image collections using advanced features like facial recognition clustering, duplicate detection, and quality assessment.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+![App Preview](public/og-image.png)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Features
 
-Follow these steps:
+- **Face-based Clustering**: Group images by faces using AI-powered facial recognition
+  - Upload a reference photo to find similar faces
+  - Perfect for organizing photos by person
+- **Duplicate Detection**: Automatically identify and remove duplicate images
+- **Blur Detection**: Filter out blurry or low-quality images
+- **Bad Angle Detection**: Remove photos with poor composition or angles
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🚀 Getting Started
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Prerequisites
 
-# Step 3: Install the necessary dependencies.
-npm i
+- Node.js (v16 or higher)
+- npm or yarn package manager
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### Installation
+
+1. Clone the repository
+```bash
+git clone https://github.com/yourusername/image-clustering-app.git
+cd image-clustering-app
 ```
 
-**Edit a file directly in GitHub**
+2. Install dependencies
+```bash
+npm install
+# or
+yarn install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. Start the development server
+```bash
+npm run dev
+# or
+yarn dev
+```
 
-**Use GitHub Codespaces**
+4. Open your browser and visit `http://localhost:8080`
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🛠️ Built With
 
-## What technologies are used for this project?
+- [Vite](https://vitejs.dev/) - Next Generation Frontend Tooling
+- [React](https://reactjs.org/) - A JavaScript library for building user interfaces
+- [TypeScript](https://www.typescriptlang.org/) - JavaScript with syntax for types
+- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework
+- [shadcn/ui](https://ui.shadcn.com/) - Re-usable components built with Radix UI and Tailwind CSS
 
-This project is built with .
+## 📁 Project Structure
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```
+src/
+├── components/         # React components
+│   ├── FeatureSelector.tsx
+│   ├── ImageUpload.tsx
+│   ├── ProcessingStatus.tsx
+│   └── ResultGallery.tsx
+├── pages/             # Page components
+├── hooks/             # Custom React hooks
+└── lib/              # Utility functions and helpers
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Lucide Icons](https://lucide.dev/) for the beautiful icons
+- [Radix UI](https://www.radix-ui.com/) for accessible UI primitives
+- The open-source community for their invaluable contributions
+
+## 📞 Support
+
+If you have any questions or need help, please:
+- Open an issue
+- Reach out to the maintainers
+- Check out our [documentation](https://docs.yourdomain.com)
+
+## 🔮 Future Features
+
+- [ ] Batch processing for large image collections
+- [ ] Custom clustering algorithms
+- [ ] Export options for processed images
+- [ ] Cloud storage integration
+- [ ] More advanced image processing filters
+
