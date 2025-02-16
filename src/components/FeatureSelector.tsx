@@ -63,12 +63,13 @@ export const FeatureSelector = ({
 
   const startCamera = async () => {
     try {
+      setShowCamera(true); // First show the dialog
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        setShowCamera(true);
       }
     } catch (err) {
+      setShowCamera(false); // Hide dialog on error
       toast({
         title: "Camera Error",
         description: "Unable to access camera. Please check permissions.",
