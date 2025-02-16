@@ -7,6 +7,7 @@ import { Image, Ban, Eye, UserSearch, Camera, Upload } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 
 interface Feature {
   id: string;
@@ -76,6 +77,14 @@ export const FeatureSelector = ({
     }
   };
 
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      setShowCamera(false);
+    }
+  };
+
   const capturePhoto = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
@@ -83,23 +92,15 @@ export const FeatureSelector = ({
       const context = canvas.getContext('2d');
 
       if (context) {
-        // Set canvas dimensions to match video
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        
-        // Draw video frame to canvas
         context.drawImage(video, 0, 0);
 
-        // Convert canvas to file
         canvas.toBlob((blob) => {
           if (blob) {
             const file = new File([blob], "captured-face.jpg", { type: "image/jpeg" });
             setFacePhoto(file);
-            
-            // Stop camera stream
-            const stream = video.srcObject as MediaStream;
-            stream.getTracks().forEach(track => track.stop());
-            setShowCamera(false);
+            stopCamera();
 
             toast({
               title: "Photo captured",
@@ -112,85 +113,94 @@ export const FeatureSelector = ({
   };
 
   return (
-    <Card className="p-6">
-      <h3 className="mb-4 text-lg font-medium">Select Features</h3>
-      <div className="space-y-4">
-        {features.map((feature) => (
-          <div key={feature.id} className="space-y-2">
-            <div className="flex items-center justify-between space-x-4">
-              <div className="flex items-center space-x-3">
-                {feature.icon}
-                <Label htmlFor={feature.id} className="text-sm font-medium">
-                  {feature.label}
-                </Label>
-              </div>
-              <Switch
-                id={feature.id}
-                checked={selectedFeatures.includes(feature.id)}
-                onCheckedChange={() => onFeatureToggle(feature.id)}
-              />
-            </div>
-            {feature.requiresPhoto && selectedFeatures.includes(feature.id) && (
-              <div className="ml-8 mt-2 space-y-3 animate-in slide-in-from-top-2 duration-200">
-                <div className="flex items-center gap-2">
-                  <div className="flex-1">
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      className="w-full text-sm"
-                      onChange={handleFacePhotoChange}
-                      onClick={(e) => {
-                        (e.target as HTMLInputElement).value = '';
-                      }}
-                    />
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                    onClick={startCamera}
-                  >
-                    <Camera className="h-4 w-4" />
-                    Capture
-                  </Button>
+    <>
+      <Card className="p-6">
+        <h3 className="mb-4 text-lg font-medium">Select Features</h3>
+        <div className="space-y-4">
+          {features.map((feature) => (
+            <div key={feature.id} className="space-y-2">
+              <div className="flex items-center justify-between space-x-4">
+                <div className="flex items-center space-x-3">
+                  {feature.icon}
+                  <Label htmlFor={feature.id} className="text-sm font-medium">
+                    {feature.label}
+                  </Label>
                 </div>
-
-                {showCamera && (
-                  <div className="relative rounded-lg border overflow-hidden">
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      className="w-full"
-                    />
+                <Switch
+                  id={feature.id}
+                  checked={selectedFeatures.includes(feature.id)}
+                  onCheckedChange={() => onFeatureToggle(feature.id)}
+                />
+              </div>
+              {feature.requiresPhoto && selectedFeatures.includes(feature.id) && (
+                <div className="ml-8 mt-2 space-y-3 animate-in slide-in-from-top-2 duration-200">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        className="w-full text-sm"
+                        onChange={handleFacePhotoChange}
+                        onClick={(e) => {
+                          (e.target as HTMLInputElement).value = '';
+                        }}
+                      />
+                    </div>
                     <Button
-                      className="absolute bottom-2 left-1/2 transform -translate-x-1/2"
-                      onClick={capturePhoto}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                      onClick={startCamera}
                     >
-                      Take Photo
+                      <Camera className="h-4 w-4" />
+                      Capture
                     </Button>
                   </div>
-                )}
 
-                {facePhoto && !showCamera && (
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={URL.createObjectURL(facePhoto)}
-                      alt="Reference face"
-                      className="h-12 w-12 rounded-full object-cover shrink-0"
-                    />
-                    <span className="text-sm text-gray-500">
-                      Reference photo selected
-                    </span>
-                  </div>
-                )}
+                  {facePhoto && (
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={URL.createObjectURL(facePhoto)}
+                        alt="Reference face"
+                        className="h-12 w-12 rounded-full object-cover shrink-0"
+                      />
+                      <span className="text-sm text-gray-500">
+                        Reference photo selected
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </Card>
 
-                <canvas ref={canvasRef} className="hidden" />
-              </div>
-            )}
+      <Dialog open={showCamera} onOpenChange={(open) => {
+        if (!open) stopCamera();
+        setShowCamera(open);
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Take a Photo</DialogTitle>
+          </DialogHeader>
+          <div className="relative rounded-lg border overflow-hidden bg-muted">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="w-full"
+            />
+            <Button
+              className="absolute bottom-4 left-1/2 transform -translate-x-1/2"
+              onClick={capturePhoto}
+            >
+              Take Photo
+            </Button>
           </div>
-        ))}
-      </div>
-    </Card>
+          <canvas ref={canvasRef} className="hidden" />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
