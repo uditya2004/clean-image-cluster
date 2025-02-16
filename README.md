@@ -25,7 +25,7 @@ A powerful web application for intelligent image organization and processing. Th
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/image-clustering-app.git
+git clone https://github.com/uditya2004/clean-image-cluster.git
 cd image-clustering-app
 ```
 
