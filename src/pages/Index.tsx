@@ -14,7 +14,7 @@ const Index = () => {
             Upload your images and select the features you want to apply
           </p>
           <p className="mt-1 text-sm text-gray-500">
-            Requires backend server running at http://localhost:8000
+            Running in frontend-only simulation mode
           </p>
         </div>
 

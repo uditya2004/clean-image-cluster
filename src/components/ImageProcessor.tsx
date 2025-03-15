@@ -75,7 +75,7 @@ export const ImageProcessor = () => {
       
       if (feature.id === "blur") {
         try {
-          // Call the FastAPI backend to process images
+          // Call the simulated API
           const result = await uploadImages(uploadedImages, selectedFeatures);
           
           // Save the processed images to state
@@ -94,19 +94,19 @@ export const ImageProcessor = () => {
           // Show summary in toast
           toast({
             title: "Blur Detection Complete",
-            description: `Kept ${result.sharp} sharp images, removed ${result.blurry} blurry images`,
+            description: `Kept ${result.sharp} sharp images, removed ${result.blurry} blurry images (simulated)`,
           });
           
         } catch (error) {
           console.error("Error processing blur images:", error);
           toast({
             title: "Processing Error",
-            description: "There was an error processing your images. Please check if the backend server is running.",
+            description: "There was an error simulating image processing.",
             variant: "destructive",
           });
         }
       } else {
-        // Simulate processing delay for other features (to be implemented later)
+        // Simulate processing delay for other features
         await new Promise((resolve) => setTimeout(resolve, 2000));
       }
       
@@ -136,35 +136,40 @@ export const ImageProcessor = () => {
 
     toast({
       title: "Processing complete",
-      description: "Your images have been processed successfully.",
+      description: "Your images have been processed successfully (simulated).",
     });
   };
 
   const handleDownload = async () => {
     toast({
-      title: "Download started",
-      description: "Your processed images are being prepared for download.",
+      title: "Download simulation",
+      description: "In a real environment, this would download your processed images.",
     });
     
-    // If the blur removal feature was selected, use the API to download
+    // In frontend-only mode, we just simulate the download
     if (selectedFeatures.includes("blur")) {
       try {
         await downloadProcessedImages();
+        
+        // Inform the user this is just a simulation
+        toast({
+          title: "Frontend-only mode",
+          description: "In a real application with a backend, your processed images would be downloaded now.",
+        });
       } catch (error) {
-        console.error("Error downloading images:", error);
+        console.error("Error simulating download:", error);
         toast({
           title: "Download Error",
-          description: "There was an error downloading your images.",
+          description: "There was an error simulating the download.",
           variant: "destructive",
         });
       }
     } else {
       // Implement other feature download logic when they're added
-      // For now, this is just a placeholder
       setTimeout(() => {
         toast({
-          title: "Download complete",
-          description: "Your processed images have been downloaded.",
+          title: "Simulation complete",
+          description: "This is a frontend-only simulation. No actual image processing occurred.",
         });
       }, 2000);
     }

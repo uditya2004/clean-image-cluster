@@ -1,8 +1,7 @@
 
-// Use a configurable API URL to allow different environments
-// Default to the FastAPI server running locally
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// This is a frontend-only implementation that simulates backend responses
 
+// Simulate API responses without a backend
 export const uploadImages = async (
   files: File[],
   features: string[]
@@ -17,80 +16,68 @@ export const uploadImages = async (
     is_blurry: boolean;
   }[]
 }> => {
-  const formData = new FormData();
-  
-  files.forEach((file) => {
-    formData.append("files", file);
-  });
-  
-  // Add features to the request
-  features.forEach(feature => {
-    formData.append("features", feature);
-  });
-  
   try {
-    console.log(`Sending request to ${API_URL}/api/process-images with ${files.length} files`);
+    console.log(`Simulating processing of ${files.length} files with features: ${features.join(', ')}`);
     
-    const response = await fetch(`${API_URL}/api/process-images`, {
-      method: "POST",
-      body: formData,
-      // Add mode: 'cors' to explicitly enable CORS
-      mode: 'cors',
+    // Create a short delay to simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Simulate processing results
+    const images = files.map(file => {
+      // Randomly determine if an image is blurry (about 30% chance)
+      const isBlurry = Math.random() < 0.3;
+      // Generate a random blur score between 50 and 200
+      const blurScore = isBlurry ? 
+        Math.floor(Math.random() * 70) + 50 : 
+        Math.floor(Math.random() * 80) + 120;
+      
+      return {
+        filename: `simulated_${file.name}`,
+        original_filename: file.name,
+        blur_score: blurScore,
+        is_blurry: isBlurry
+      };
     });
     
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Server error: ${response.status}`, errorText);
-      throw new Error(`HTTP error! status: ${response.status}. ${errorText}`);
-    }
+    const blurryCount = images.filter(img => img.is_blurry).length;
+    const sharpCount = images.length - blurryCount;
     
-    const data = await response.json();
-    console.log("API response:", data);
-    return data;
+    const result = {
+      total: images.length,
+      sharp: sharpCount,
+      blurry: blurryCount,
+      images: images
+    };
+    
+    console.log("Simulated processing results:", result);
+    return result;
   } catch (error) {
-    console.error("Error uploading images:", error);
+    console.error("Error simulating image processing:", error);
     throw error;
   }
 };
 
 export const downloadProcessedImages = async (): Promise<string> => {
   try {
-    console.log(`Requesting download from ${API_URL}/api/download`);
+    console.log(`Simulating download of processed images`);
     
-    // Get the URL for the download
-    const downloadUrl = `${API_URL}/api/download`;
+    // Create a delay to simulate processing
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Open the download URL in a new tab
-    window.open(downloadUrl, '_blank');
+    // Since we can't actually create a download without a backend,
+    // we'll just show a message to the user via console
+    console.log("In a real backend implementation, this would download the processed images");
     
-    return downloadUrl;
+    return "frontend-only-mode";
   } catch (error) {
-    console.error("Error downloading images:", error);
+    console.error("Error simulating download:", error);
     throw error;
   }
 };
 
-// Helper function to check if backend is available
+// Always return true since we're simulating the backend
 export const checkBackendStatus = async (): Promise<boolean> => {
-  try {
-    console.log(`Checking backend status at ${API_URL}`);
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    const response = await fetch(`${API_URL}`, {
-      method: "GET",
-      headers: {
-        "Accept": "application/json",
-      },
-      mode: 'cors',
-      signal: controller.signal,
-    });
-    
-    clearTimeout(timeoutId);
-    return response.ok;
-  } catch (error) {
-    console.warn("Backend check failed:", error);
-    return false;
-  }
+  // Simulate a short delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return true;
 };
