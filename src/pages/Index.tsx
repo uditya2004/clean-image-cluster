@@ -7,11 +7,19 @@ import { ResultGallery } from "@/components/ResultGallery";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Download } from "lucide-react";
+import { uploadImages, downloadProcessedImages } from "@/services/apiService";
 
 interface ProcessingFeature {
   id: string;
   label: string;
   status: "pending" | "processing" | "completed";
+}
+
+interface ProcessedImage {
+  filename: string;
+  original_filename: string;
+  blur_score: number;
+  is_blurry: boolean;
 }
 
 const features = [
@@ -28,6 +36,8 @@ const Index = () => {
   const [processingFeatures, setProcessingFeatures] = useState<ProcessingFeature[]>([]);
   const [currentProgress, setCurrentProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [processedImages, setProcessedImages] = useState<ProcessedImage[]>([]);
+  const [filteredImages, setFilteredImages] = useState<File[]>([]);
   const { toast } = useToast();
 
   const handleUpload = (files: File[]) => {
@@ -64,8 +74,45 @@ const Index = () => {
         )
       );
       
-      // Simulate processing delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (feature.id === "blur") {
+        try {
+          // Call the FastAPI backend to process images
+          const result = await uploadImages(uploadedImages, selectedFeatures);
+          
+          // Save the processed images to state
+          setProcessedImages(result.images);
+          
+          // Filter the original images based on which ones were kept
+          const keptFiles = uploadedImages.filter(file => {
+            const matchingResult = result.images.find(img => 
+              img.original_filename === file.name && !img.is_blurry
+            );
+            return !!matchingResult;
+          });
+          
+          setFilteredImages(keptFiles);
+          
+        } catch (error) {
+          console.error("Error processing blur images:", error);
+          toast({
+            title: "Processing Error",
+            description: "There was an error processing your images.",
+            variant: "destructive",
+          });
+          
+          // Update the feature status to completed even if there was an error
+          setProcessingFeatures((prev) =>
+            prev.map((f) =>
+              f.id === feature.id ? { ...f, status: "completed" } : f
+            )
+          );
+          
+          continue; // Skip to the next feature
+        }
+      } else {
+        // Simulate processing delay for other features (to be implemented later)
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
       
       // Update current feature to completed
       setProcessingFeatures((prev) =>
@@ -115,12 +162,34 @@ const Index = () => {
     });
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     toast({
       title: "Download started",
       description: "Your processed images are being prepared for download.",
     });
-    // TODO: Implement actual ZIP download logic
+    
+    // If the blur removal feature was selected, use the API to download
+    if (selectedFeatures.includes("blur")) {
+      try {
+        await downloadProcessedImages();
+      } catch (error) {
+        console.error("Error downloading images:", error);
+        toast({
+          title: "Download Error",
+          description: "There was an error downloading your images.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      // Implement other feature download logic when they're added
+      // For now, this is just a placeholder
+      setTimeout(() => {
+        toast({
+          title: "Download complete",
+          description: "Your processed images have been downloaded.",
+        });
+      }, 2000);
+    }
   };
 
   return (
@@ -175,7 +244,7 @@ const Index = () => {
         {isComplete && (
           <div className="animate-slideUp">
             <ResultGallery
-              images={uploadedImages}
+              images={selectedFeatures.includes("blur") ? filteredImages : uploadedImages}
               onDownload={handleDownload}
             />
           </div>

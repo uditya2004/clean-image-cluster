@@ -15,7 +15,7 @@ export const ResultGallery = ({ images, onDownload }: ResultGalleryProps) => {
   const handleDownload = async () => {
     setIsDownloading(true);
     await onDownload();
-    // Simulate download process
+    // Set a timeout to reset the downloading state
     setTimeout(() => {
       setIsDownloading(false);
     }, 2000);
@@ -23,6 +23,11 @@ export const ResultGallery = ({ images, onDownload }: ResultGalleryProps) => {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">Processed Results</h3>
+        <p className="text-sm text-gray-500">{images.length} images kept</p>
+      </div>
+      
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {images.map((image, index) => (
           <Card key={index} className="overflow-hidden">
@@ -34,6 +39,7 @@ export const ResultGallery = ({ images, onDownload }: ResultGalleryProps) => {
           </Card>
         ))}
       </div>
+      
       <div className="flex justify-center pt-4">
         <Button 
           onClick={handleDownload} 
