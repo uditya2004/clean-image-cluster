@@ -1,6 +1,4 @@
 
-import { useToast } from "@/hooks/use-toast";
-
 // Use a configurable API URL to allow different environments
 // Default to the FastAPI server running locally
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -36,6 +34,8 @@ export const uploadImages = async (
     const response = await fetch(`${API_URL}/api/process-images`, {
       method: "POST",
       body: formData,
+      // Add mode: 'cors' to explicitly enable CORS
+      mode: 'cors',
     });
     
     if (!response.ok) {
@@ -73,15 +73,21 @@ export const downloadProcessedImages = async (): Promise<string> => {
 // Helper function to check if backend is available
 export const checkBackendStatus = async (): Promise<boolean> => {
   try {
+    console.log(`Checking backend status at ${API_URL}`);
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
     const response = await fetch(`${API_URL}`, {
       method: "GET",
       headers: {
         "Accept": "application/json",
       },
-      // Set a timeout to avoid long waits
-      signal: AbortSignal.timeout(3000),
+      mode: 'cors',
+      signal: controller.signal,
     });
     
+    clearTimeout(timeoutId);
     return response.ok;
   } catch (error) {
     console.warn("Backend check failed:", error);
