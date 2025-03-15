@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, ImageOff } from "lucide-react";
+import { Alert, AlertDescription } from "./ui/alert";
 
 interface ResultGalleryProps {
   images: File[];
@@ -28,22 +29,31 @@ export const ResultGallery = ({ images, onDownload }: ResultGalleryProps) => {
         <p className="text-sm text-gray-500">{images.length} images kept</p>
       </div>
       
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {images.map((image, index) => (
-          <Card key={index} className="overflow-hidden">
-            <img
-              src={URL.createObjectURL(image)}
-              alt={`Processed ${index + 1}`}
-              className="aspect-square h-full w-full object-cover"
-            />
-          </Card>
-        ))}
-      </div>
+      {images.length > 0 ? (
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {images.map((image, index) => (
+            <Card key={index} className="overflow-hidden">
+              <img
+                src={URL.createObjectURL(image)}
+                alt={`Processed ${index + 1}`}
+                className="aspect-square h-full w-full object-cover"
+              />
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Alert>
+          <ImageOff className="h-4 w-4 mr-2" />
+          <AlertDescription>
+            No sharp images were found in your selection. All images were classified as blurry.
+          </AlertDescription>
+        </Alert>
+      )}
       
       <div className="flex justify-center pt-4">
         <Button 
           onClick={handleDownload} 
-          disabled={isDownloading}
+          disabled={isDownloading || images.length === 0}
           className="flex items-center gap-2"
         >
           {isDownloading ? (

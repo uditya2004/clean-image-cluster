@@ -1,13 +1,14 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ImageUpload } from "@/components/ImageUpload";
 import { FeatureSelector } from "@/components/FeatureSelector";
 import { ProcessingStatus } from "@/components/ProcessingStatus";
 import { ResultGallery } from "@/components/ResultGallery";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Download } from "lucide-react";
-import { uploadImages, downloadProcessedImages } from "@/services/apiService";
+import { Download, AlertTriangle } from "lucide-react";
+import { uploadImages, downloadProcessedImages, checkBackendStatus } from "@/services/apiService";
 
 interface ProcessingFeature {
   id: string;
@@ -38,7 +39,31 @@ const Index = () => {
   const [isComplete, setIsComplete] = useState(false);
   const [processedImages, setProcessedImages] = useState<ProcessedImage[]>([]);
   const [filteredImages, setFilteredImages] = useState<File[]>([]);
+  const [backendAvailable, setBackendAvailable] = useState<boolean | null>(null);
   const { toast } = useToast();
+
+  // Check backend status on component mount
+  useEffect(() => {
+    const checkBackend = async () => {
+      try {
+        const isAvailable = await checkBackendStatus();
+        setBackendAvailable(isAvailable);
+        
+        if (!isAvailable) {
+          toast({
+            title: "Backend Connection Issue",
+            description: "Unable to connect to the backend server. Make sure it's running on http://localhost:8000",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error checking backend:", error);
+        setBackendAvailable(false);
+      }
+    };
+    
+    checkBackend();
+  }, [toast]);
 
   const handleUpload = (files: File[]) => {
     setUploadedImages(files);
@@ -76,6 +101,12 @@ const Index = () => {
       
       if (feature.id === "blur") {
         try {
+          // Check backend connection before making the request
+          const isAvailable = await checkBackendStatus();
+          if (!isAvailable) {
+            throw new Error("Backend server is not available");
+          }
+          
           // Call the FastAPI backend to process images
           const result = await uploadImages(uploadedImages, selectedFeatures);
           
@@ -92,11 +123,17 @@ const Index = () => {
           
           setFilteredImages(keptFiles);
           
+          // Show summary in toast
+          toast({
+            title: "Blur Detection Complete",
+            description: `Kept ${result.sharp} sharp images, removed ${result.blurry} blurry images`,
+          });
+          
         } catch (error) {
           console.error("Error processing blur images:", error);
           toast({
             title: "Processing Error",
-            description: "There was an error processing your images.",
+            description: "There was an error processing your images. Please check if the backend server is running.",
             variant: "destructive",
           });
           
@@ -204,6 +241,16 @@ const Index = () => {
           </p>
         </div>
 
+        {backendAvailable === false && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Backend Connection Error</AlertTitle>
+            <AlertDescription>
+              Cannot connect to the backend server. Make sure it's running on http://localhost:8000
+            </AlertDescription>
+          </Alert>
+        )}
+
         <ImageUpload onUpload={handleUpload} />
 
         {uploadedImages.length > 0 && !processing && !isComplete && (
@@ -222,7 +269,7 @@ const Index = () => {
             <div className="flex justify-center">
               <Button
                 onClick={handleProcess}
-                disabled={processing}
+                disabled={processing || !backendAvailable}
                 className="group relative flex items-center gap-2"
               >
                 <Download className="h-4 w-4" />
